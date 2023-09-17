@@ -19,7 +19,6 @@ const Quiz = ({ data, questionNumber, setQuestionNumber, setTimeOut }) => {
 
   useEffect(() => {
     setQuestion(data[questionNumber - 1]);
-    setShow5050Button(true);
   }, [data, questionNumber]);
 
   useEffect(() => {
