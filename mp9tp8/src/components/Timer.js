@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 const Timer = ({ setTimeOut, questionNumber }) => {
-  const [timer, setTimer] = useState(50);
+  const [timer, setTimer] = useState(30);
 
   useEffect(() => {
     if (timer === 0) return setTimeOut(true);
@@ -13,7 +13,7 @@ const Timer = ({ setTimeOut, questionNumber }) => {
   }, [timer, setTimeOut]);
 
   useEffect(() => {
-    setTimer(50);
+    setTimer(30);
   }, [questionNumber]);
   return timer;
 };

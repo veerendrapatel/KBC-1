@@ -3,6 +3,7 @@ import useSound from "use-sound";
 import play from "../sounds/play.mp3";
 import correct from "../sounds/correct.mp3";
 import wrong from "../sounds/wrong.mp3";
+import Timer from "./Timer";
 
 const Quiz = ({ data, questionNumber, setQuestionNumber, setTimeOut }) => {
   const [question, setQuestion] = useState(null);
@@ -14,13 +15,14 @@ const Quiz = ({ data, questionNumber, setQuestionNumber, setTimeOut }) => {
   const [showNextButton, setShowNextButton] = useState(false);
   const [show5050Button, setShow5050Button] = useState(true);
   const [showPhoneButton, setPhoneButton] = useState(true);
-  const [showAnswers, setShowAnswers] = useState(false); // State for showing answers
+  const [showAnswers, setShowAnswers] = useState(false);
 
   const timerIdRef = useRef(null);
 
   useEffect(() => {
     setQuestion(data[questionNumber - 1]);
-    setShowAnswers(false); // Reset the "Show Answers" state when the question changes
+    setShowAnswers(false);
+    setSelectedAnswer(null); // Reset selected answer when the question changes
   }, [data, questionNumber]);
 
   useEffect(() => {
@@ -40,7 +42,6 @@ const Quiz = ({ data, questionNumber, setQuestionNumber, setTimeOut }) => {
     timerIdRef.current = setTimeout(() => {
       handleTimerExpiration();
     }, 30000);
-
     return () => clearTimeout(timerIdRef.current);
   };
 
@@ -67,7 +68,7 @@ const Quiz = ({ data, questionNumber, setQuestionNumber, setTimeOut }) => {
     setSelectedAnswer(null);
     setClassName("answer");
     setTimeOut(false);
-    setShow5050Button(true); // Reset the 50-50 button for the next question
+    setShow5050Button(true);
   };
 
   const handle5050 = () => {
@@ -105,23 +106,18 @@ const Quiz = ({ data, questionNumber, setQuestionNumber, setTimeOut }) => {
 
   const handleClick = (item) => {
     setSelectedAnswer(item);
-    setClassName("answer active");
 
-    delay(5000, () => {
-      setClassName(item.correct ? "answer correct" : "answer wrong");
-      if (item.correct) {
-        handleCorrectAnswer();
-      }
-    });
-
-    delay(5000, () => {
-      if (!item.correct) {
-        wrongAnswer();
-        delay(1000, () => {
-          setTimeOut(true);
-        });
-      }
-    });
+    if (item.correct) {
+      setClassName("answer correct");
+      handleCorrectAnswer();
+    } else {
+      setClassName("answer wrong");
+      wrongAnswer();
+      delay(2000, () => {
+        setClassName("answer");
+        setSelectedAnswer(null); // Allow the user to select another option
+      });
+    }
   };
 
   const handleShowAnswers = () => {
@@ -131,6 +127,11 @@ const Quiz = ({ data, questionNumber, setQuestionNumber, setTimeOut }) => {
 
   return (
     <div className="quiz">
+      {showAnswers && (
+        <div className="timer">
+          <Timer setTimeOut={setTimeOut} questionNumber={questionNumber} />
+        </div>
+      )}
       <div className="question">{question?.question}</div>
       <div className="answers">
         {showAnswers &&
@@ -138,7 +139,7 @@ const Quiz = ({ data, questionNumber, setQuestionNumber, setTimeOut }) => {
             <div
               key={item.id}
               className={selectedAnswer === item ? className : "answer"}
-              onClick={() => !selectedAnswer && handleClick(item)}
+              onClick={() => handleClick(item)}
             >
               {item.text}
             </div>

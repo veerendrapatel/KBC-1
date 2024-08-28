@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { MDBRow, MDBCol, MDBListGroup, MDBBtn } from "mdb-react-ui-kit";
 import Quiz from "./components/Quiz";
 import { prizeMoney } from "./data";
-import Timer from "./components/Timer";
 import Start from "./components/Start";
 // Mapping of data file imports
 const dataFiles = {
@@ -53,14 +52,6 @@ function App() {
             <div className="main">
               {(
                 <>
-                  <div style={{ height: "50%", position: "relative" }}>
-                    <div className="timer">
-                    <Timer
-                        setTimeOut={setTimeOut}
-                        questionNumber={questionNumber}
-                      />
-                    </div>
-                  </div>
                   <div style={{ height: "50%" }}>
                     <Quiz
                       data={loadedData}
