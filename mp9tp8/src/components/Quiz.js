@@ -14,17 +14,21 @@ const Quiz = ({ data, questionNumber, setQuestionNumber, setTimeOut }) => {
   const [showNextButton, setShowNextButton] = useState(false);
   const [show5050Button, setShow5050Button] = useState(true);
   const [showPhoneButton, setPhoneButton] = useState(true);
+  const [showAnswers, setShowAnswers] = useState(false); // State for showing answers
 
   const timerIdRef = useRef(null);
 
   useEffect(() => {
     setQuestion(data[questionNumber - 1]);
+    setShowAnswers(false); // Reset the "Show Answers" state when the question changes
   }, [data, questionNumber]);
 
   useEffect(() => {
-    letsPlay();
-    startTimer();
-  }, [letsPlay, question]);
+    if (showAnswers) {
+      letsPlay();
+      startTimer();
+    }
+  }, [letsPlay, showAnswers]);
 
   const delay = (duration, callBack) => {
     setTimeout(() => {
@@ -39,9 +43,10 @@ const Quiz = ({ data, questionNumber, setQuestionNumber, setTimeOut }) => {
 
     return () => clearTimeout(timerIdRef.current);
   };
-const handlePhone = () => {
-  setPhoneButton(false);
-}
+
+  const handlePhone = () => {
+    setPhoneButton(false);
+  };
 
   const handleTimerExpiration = () => {
     if (!selectedAnswer && !showNextButton) {
@@ -62,7 +67,7 @@ const handlePhone = () => {
     setSelectedAnswer(null);
     setClassName("answer");
     setTimeOut(false);
-    startTimer();
+    setShow5050Button(true); // Reset the 50-50 button for the next question
   };
 
   const handle5050 = () => {
@@ -110,9 +115,7 @@ const handlePhone = () => {
     });
 
     delay(5000, () => {
-      if (item.correct) {
-        // No automatic progression, wait for "Next" button
-      } else {
+      if (!item.correct) {
         wrongAnswer();
         delay(1000, () => {
           setTimeOut(true);
@@ -121,36 +124,47 @@ const handlePhone = () => {
     });
   };
 
+  const handleShowAnswers = () => {
+    setShowAnswers(true);
+    startTimer();
+  };
+
   return (
     <div className="quiz">
       <div className="question">{question?.question}</div>
       <div className="answers">
-        {question?.answers.map((item) => (
-          <div
-            key={item.id}
-            className={selectedAnswer === item ? className : "answer"}
-            onClick={() => !selectedAnswer && handleClick(item)}
-          >
-            {item.text}
-          </div>
-        ))}
+        {showAnswers &&
+          question?.answers.map((item) => (
+            <div
+              key={item.id}
+              className={selectedAnswer === item ? className : "answer"}
+              onClick={() => !selectedAnswer && handleClick(item)}
+            >
+              {item.text}
+            </div>
+          ))}
       </div>
       <div className="button-container">
-      {show5050Button && (
-        <button className="fifty-button" onClick={handle5050}>
-          50-50
-        </button>
-      )}
-      {showNextButton && (
-        <button className="next-button" onClick={handleNext}>
-          Next
-        </button>
-      )}
-      {showPhoneButton && (
-        <button className="phone-button" onClick={handlePhone}>
-          Phone your friend
-        </button>
-      )}
+        {!showAnswers && (
+          <button className="show-answers-button" onClick={handleShowAnswers}>
+            Show Answers
+          </button>
+        )}
+        {show5050Button && showAnswers && (
+          <button className="fifty-button" onClick={handle5050}>
+            50-50
+          </button>
+        )}
+        {showNextButton && (
+          <button className="next-button" onClick={handleNext}>
+            Next
+          </button>
+        )}
+        {showPhoneButton && showAnswers && (
+          <button className="phone-button" onClick={handlePhone}>
+            Phone your friend
+          </button>
+        )}
       </div>
     </div>
   );

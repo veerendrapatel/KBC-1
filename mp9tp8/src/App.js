@@ -2,16 +2,40 @@ import "./styles.css";
 import { useState, useEffect } from "react";
 import { MDBRow, MDBCol, MDBListGroup, MDBBtn } from "mdb-react-ui-kit";
 import Quiz from "./components/Quiz";
-import { data, prizeMoney } from "./data";
+import { prizeMoney } from "./data";
 import Timer from "./components/Timer";
 import Start from "./components/Start";
-
+// Mapping of data file imports
+const dataFiles = {
+  1: () => import('./data1'),
+  2: () => import('./data2'),
+  3: () => import('./data3'),
+  4: () => import('./data4'),
+  5: () => import('./data5'),
+  6: () => import('./data6'),
+  7: () => import('./data7'),
+  8: () => import('./data8'),
+  9: () => import('./data9'),
+  10: () => import('./data10'),
+};
 function App() {
   const [name, setName] = useState(null);
   const [questionNumber, setQuestionNumber] = useState(1);
   const [timeOut, setTimeOut] = useState(false);
-  const [earned, setEarned] = useState("₹ 0");
+  const [loadedData, setLoadedData] = useState(null);
 
+  const [earned, setEarned] = useState("₹ 0");
+  useEffect(() => {
+    const randomNumber = Math.floor(Math.random() * 10) + 1; // Random number between 1 and 10
+
+    dataFiles[randomNumber]()
+      .then((module) => {
+        setLoadedData(module.data);
+      })
+      .catch((error) => {
+        console.error("Error loading data file:", error);
+      });
+  }, []);
   useEffect(() => {
     questionNumber > 1 &&
       setEarned(
@@ -39,7 +63,7 @@ function App() {
                   </div>
                   <div style={{ height: "50%" }}>
                     <Quiz
-                      data={data}
+                      data={loadedData}
                       questionNumber={questionNumber}
                       setQuestionNumber={setQuestionNumber}
                       setTimeOut={setTimeOut}
